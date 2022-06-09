@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/c7867bb742.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="./css/styles.css">
+    <title>Document</title>
+</head>
+<body>
+    <h1>The Bars List</h1>
+    <div class="barsList">
+        <ul class="bars">
+            <% for (let i = 0; i < bars.length; i++) { %>
+                <li class="bar">
+                    <figure>
+                        <blockquote><%= bars[i].barLyrics %></blockquote>
+                        <figcaption>
+                            &mdash; <span class="barRapper"><%= bars[i].barRapper %></span>,
+                            <cite class="barSong"><%= bars[i].barSong %></cite>.
+                            <span class="barLikes"><%= bars[i].barLikes %></span> <button class="like"><i class="fa-solid fa-thumbs-up"></i></button>
+                        </figcaption>
+                    </figure>
+                    
+                </li>
+            <% } %>
+        </ul>
+        
+    </div>
+    
+    <p>Submit your favorite rap bars</p>
+    <form method="POST" action="addBar">
+        <input type="text" placeholder="Bar" name="barLyrics">
+        <input type="text" placeholder="Rapper Name" name="barRapper">
+        <input type="text" placeholder="Song" name="barSong">
+        <button id="submit-bar" type="submit">Submit</button>
+    </form>
+    <script src="./scripts/main.js"></script>
+</body>
+</html>
