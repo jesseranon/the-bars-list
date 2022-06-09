@@ -5,9 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "serve -s build",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "heroku-postbuild": "npm run build"
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Jesse Ranon",
   "license": "ISC",
@@ -15,8 +14,7 @@
     "dotenv": "^16.0.1",
     "ejs": "^3.1.8",
     "express": "^4.18.1",
-    "mongodb": "^4.7.0",
-    "serve": "^13.0.2"
+    "mongodb": "^4.7.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.16"
