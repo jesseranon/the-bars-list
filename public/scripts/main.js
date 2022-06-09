@@ -13,7 +13,6 @@ LIKE_BUTTONS.forEach(async likeButton => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     barLyrics,
-                    barRapper,
                     barLikes
                 })
             });

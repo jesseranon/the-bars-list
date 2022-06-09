@@ -51,8 +51,6 @@ MongoClient.connect(connectionString, {
                 { barLyrics: request.body.barLyrics },
                 {
                     $set: {
-                        barLyrics: request.body.barLyrics,
-                        barRapper: request.body.barRapper,
                         barLikes: request.body.barLikes
                     }
                 },
