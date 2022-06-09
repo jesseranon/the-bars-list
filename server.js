@@ -7,7 +7,9 @@ dotenv.config();
 const PORT = process.env.PORT || 3000;
 const connectionString = process.env.CONNECTIONSTRING;
 
-MongoClient.connect(connectionString)
+MongoClient.connect(connectionString, {
+    useUnifiedTopology: true
+})
     .then(client => {
         const db = client.db('rapper-api');
 
