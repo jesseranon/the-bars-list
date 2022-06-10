@@ -1,11 +1,12 @@
 const express = require('express');
 const app = express();
 const MongoClient = require('mongodb').MongoClient;
-const dotenv = require('dotenv');
-dotenv.config();
+require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
 const connectionString = process.env.CONNECTIONSTRING;
+
+let message;
 
 MongoClient.connect(connectionString, {
     useUnifiedTopology: true
@@ -22,7 +23,7 @@ MongoClient.connect(connectionString, {
             // console.log(request);
             db.collection('rappers').find().toArray()
                 .then(data => {
-                    response.render('index.ejs', { bars: data });
+                    response.render('index.ejs', { bars: data, message });
                 })
                 .catch(err => {
                     console.error(err);
@@ -31,27 +32,43 @@ MongoClient.connect(connectionString, {
 
         app.post('/addBar', (request, response) => {
             let bar = request.body;
-            db.collection('rappers').insertOne({
-                barLyrics: bar.barLyrics,
-                barRapper: bar.barRapper,
-                barSong: bar.barSong,
-                barLikes: 0
-            })
-                .then(result => {
-                    console.log('Bar added');
-                    response.redirect('/');
-                })
-                .catch(err => {
-                    console.error(err);
+            let duplicate;
+            db.collection('rappers').findOne({ barLyrics: request.body.barLyrics }) 
+                .then(data => {
+                    duplicate = data;
+                    if (!duplicate) {
+                        db.collection('rappers').insertOne({
+                            barLyrics: bar.barLyrics,
+                            barRapper: bar.barRapper,
+                            barSong: bar.barSong,
+                            barLikes: 0,
+                            barDislikes: 0
+                        })
+                            .then(result => {
+                                message = '';
+                                console.log('Bar added');
+                                response.redirect('/');
+                            })
+                            .catch(err => {
+                                console.error(err);
+                            });
+                    } else {
+                        console.log('duplicate found');
+                        message = `This bar has already been submitted: 
+                        ${bar.barLyrics}`
+                        response.redirect('/');
+                    }
                 });
         });
 
-        app.put('/addLike', (request, response) => {
+        app.put('/addVote', (request, response) => {
+            message = '';
             db.collection('rappers').findOneAndUpdate(
                 { barLyrics: request.body.barLyrics },
                 {
                     $set: {
-                        barLikes: request.body.barLikes
+                        barLikes: request.body.barLikes,
+                        barDislikes: request.body.barDislikes
                     }
                 },
                 {
@@ -59,7 +76,6 @@ MongoClient.connect(connectionString, {
                 }
                 )
                 .then(result => {
-                    console.log(result);
                     response.json(result);
                 })
                 .catch(err => {
