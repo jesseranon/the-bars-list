@@ -11,15 +11,22 @@
 <body>
     <header>
         <h1>The Bars List</h1>
-        <div class="message"><%= message %></div>
-        <form method="POST" action="addBar">
-            <input type="text" placeholder="Bar" name="barLyrics">
-            <input type="text" placeholder="Rapper Name" name="barRapper">
-            <input type="text" placeholder="Song" name="barSong">
+        <ul class="message">
+            <% for (let i = 0; i < message.length; i++) { %>
+                <li class="message-line">
+                    <%= message[i] %>
+                </li>
+            <% } %>
+        </ul>
+    </header>
+    <div class="barForm flex form-flex">
+        <form> <!--<form method="POST" action="addBar">-->
+            <input type="text" placeholder="Your favorite bars" name="barLyrics" id="barLyrics">
+            <input type="text" placeholder="Rapper Name" name="barRapper" id="barRapper">
+            <input type="text" placeholder="Song" name="barSong" id="barSong">
             <button id="submit-bar" type="submit">Submit</button>
         </form>
-    </header>
-
+    </div>
     <div class="barsList">
         <ul class="bars">
             <% for (let i = 0; i < bars.length; i++) { %>
@@ -30,19 +37,30 @@
                             <i class="fa-solid fa-angle-up"></i>
                         </div>
                         <!--total likes/dislikes-->
-                        <span class="votes"><%= bars[i].barLikes - bars[i].barDislikes %></span>
+                        <span class="votes">
+                            <%= bars[i].barLikes - bars[i].barDislikes %>
+                        </span>
                         <!--downvote-->
                         <div class="dislike" value=<%= bars[i].barDislikes %>>
                             <i class="fa-solid fa-angle-down"></i>
                         </div>
                     </div>
                     <figure class="flex flex-vertical flex-content">
-                        <blockquote><%= bars[i].barLyrics %></blockquote>
+                        <blockquote value=<%= bars[i]._id %>><%= bars[i].barLyrics %></blockquote>
                         <figcaption>
                             <!--&mdash; --><span class="barRapper"><%= bars[i].barRapper %></span>,
                             <cite class="barSong"><%= bars[i].barSong %></cite>
                         </figcaption>
                     </figure>
+                    <ul class="bar-control">
+                        <!-- <li>
+                            <button class="bar-button bar-edit">Edit</button>
+                        </li>
+                        <li>
+                            <button class="bar-button bar-delete">Delete</button>
+                        </li> -->
+                    </ul>
+                    
                 </li>
             <% } %>
         </ul>

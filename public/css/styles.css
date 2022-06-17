@@ -1,5 +1,27 @@
+:root {
+    --default-background: white;
+}
+
 ul {
     list-style: none;
+}
+
+.barForm {
+    position: sticky;
+    top: 0px;
+    height: 3rem;
+    width: 100%;
+    background: var(--default-background);
+}
+
+form,
+.barsList {
+    margin: 0 auto;
+}
+
+.barsList {
+    width: 75%;
+    max-width: 100rem;
 }
 
 .bar {
@@ -37,6 +59,11 @@ figcaption {
 .flex-vertical {
     flex-direction: column;
     justify-content: space-around;
+}
+
+.form-flex {
+    justify-content: center;
+    align-items: center;
 }
 
 .flex-votes {

@@ -6,12 +6,12 @@ require('dotenv').config();
 const PORT = process.env.PORT || 3000;
 const connectionString = process.env.CONNECTIONSTRING;
 
-let message;
-
 MongoClient.connect(connectionString, {
     useUnifiedTopology: true
 })
     .then(client => {
+        let message = [];
+
         const db = client.db('rapper-api');
 
         app.set('view engine', 'ejs');
@@ -31,12 +31,21 @@ MongoClient.connect(connectionString, {
         });
 
         app.post('/addBar', (request, response) => {
+            message = [];
             let bar = request.body;
+            console.log(bar);
+            for (const param in bar) {
+                if (!bar[param]) {
+                    message.push(`${param.slice(3)} not filled in`);    
+                }
+            }
+            if (message.length > 0) return response.json({ message });
             let duplicate;
             db.collection('rappers').findOne({ barLyrics: request.body.barLyrics }) 
                 .then(data => {
                     duplicate = data;
                     if (!duplicate) {
+                        console.log('no duplicate found')
                         db.collection('rappers').insertOne({
                             barLyrics: bar.barLyrics,
                             barRapper: bar.barRapper,
@@ -45,26 +54,25 @@ MongoClient.connect(connectionString, {
                             barDislikes: 0
                         })
                             .then(result => {
-                                message = '';
-                                console.log('Bar added');
-                                response.redirect('/');
+                                message = [];
+                                response.json(result);
                             })
                             .catch(err => {
-                                console.error(err);
+                                response.json(err);
                             });
                     } else {
                         console.log('duplicate found');
-                        message = `This bar has already been submitted: 
-                        ${bar.barLyrics}`
-                        response.redirect('/');
+                        message.push(`This bar has already been submitted:\n
+                        ${bar.barLyrics}`);
+                        response.json({ duplicate, message });
                     }
                 });
         });
 
         app.put('/addVote', (request, response) => {
-            message = '';
+            message = [];
             db.collection('rappers').findOneAndUpdate(
-                { barLyrics: request.body.barLyrics },
+                { barId: request.body.barId },
                 {
                     $set: {
                         barLikes: request.body.barLikes,
@@ -79,9 +87,12 @@ MongoClient.connect(connectionString, {
                     response.json(result);
                 })
                 .catch(err => {
-                    console.error(err);
+                    message.push(err);
+                    response.redirect('/');
                 });
         });
+
+        //app.delete('/', (request, resp;onse) => {});
 
         app.listen(PORT, () => {
             console.log(`listening on port ${PORT}`);
