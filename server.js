@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const MongoClient = require('mongodb').MongoClient;
+const ObjectId = require('mongodb').ObjectId;
 require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
@@ -71,8 +72,10 @@ MongoClient.connect(connectionString, {
 
         app.put('/addVote', (request, response) => {
             message = [];
+            const id = request.body.barId;
+            const goodId = new ObjectId(id);  
             db.collection('rappers').findOneAndUpdate(
-                { barId: request.body.barId },
+                { _id: goodId },
                 {
                     $set: {
                         barLikes: request.body.barLikes,
@@ -84,15 +87,34 @@ MongoClient.connect(connectionString, {
                 }
                 )
                 .then(result => {
-                    response.json(result);
+                    console.log(result);
+                    response.json({ success: 'success' });
                 })
                 .catch(err => {
                     message.push(err);
-                    response.redirect('/');
+                    response.json({ error: err });
                 });
         });
 
-        //app.delete('/', (request, resp;onse) => {});
+        app.delete('/delete/:id', (request, response) => {
+            message = [];
+            //user should pass their localStorage value for the entry
+            //if user does not have authority to delete entry, respond appropriately
+            //if user has authority to delete entry (localstorage value == 'created')
+            console.log(request.params.id);
+            const goodId = new ObjectId(request.params.id);
+            db.collection('rappers').findOneAndDelete(
+                { _id: goodId }
+            )
+                .then(result => {
+                    console.log(result);
+                    message.push(`deleted bar: ${request.body.barLyrics}`);
+                    response.json(result.value);
+                })
+                .catch(err => {
+                    response.json({ error: err });
+                });
+        });
 
         app.listen(PORT, () => {
             console.log(`listening on port ${PORT}`);

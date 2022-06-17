@@ -25,9 +25,11 @@ form,
 }
 
 .bar {
-    border: 1px solid black;
+    /* border: 1px solid black; */
     margin: 1rem;
     padding: .5rem 1rem;
+
+    border-radius: 2px;
 }
 
 figure {
@@ -42,7 +44,7 @@ figcaption {
 }
 
 figcaption {
-    border-left: 3px solid red;
+    border-left: 3px solid skyblue;
     margin-top: .25rem;
     margin-left: .5rem;
 }
@@ -54,6 +56,10 @@ figcaption {
 
 .flex {
     display: flex;
+}
+
+.flex-horizontal {
+    justify-content: space-between;
 }
 
 .flex-vertical {
@@ -78,10 +84,22 @@ figcaption {
     color: red;
 }
 
+
+
 .liked {
     color: orangered;
 }
 
 .disliked {
     color: skyblue;
+}
+
+.created {
+    /* border-color: orangered; */
+    background-color: rgba(255, 69, 0, .3);
+}
+
+.created .like,
+.created .dislike {
+    pointer-events: none;
 }

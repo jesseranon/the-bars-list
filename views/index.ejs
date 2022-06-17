@@ -30,29 +30,33 @@
     <div class="barsList">
         <ul class="bars">
             <% for (let i = 0; i < bars.length; i++) { %>
-                <li class="bar flex flex-horizontal">
-                    <div class="likes-dislikes flex flex-vertical flex-votes">
-                        <!--upvote-->
-                        <div class="like" value=<%= bars[i].barLikes %>>
-                            <i class="fa-solid fa-angle-up"></i>
+                <li class="bar flex flex-horizontal" value=<%= bars[i]._id %>>
+                    <div class="bar-info flex">
+                        <div class="likes-dislikes flex flex-vertical flex-votes">
+                            <!--upvote-->
+                            <div class="like" value=<%= bars[i].barLikes %>>
+                                <i class="fa-solid fa-angle-up"></i>
+                            </div>
+                            <!--total likes/dislikes-->
+                            <span class="votes">
+                                <%= bars[i].barLikes - bars[i].barDislikes %>
+                            </span>
+                            <!--downvote-->
+                            <div class="dislike" value=<%= bars[i].barDislikes %>>
+                                <i class="fa-solid fa-angle-down"></i>
+                            </div>
                         </div>
-                        <!--total likes/dislikes-->
-                        <span class="votes">
-                            <%= bars[i].barLikes - bars[i].barDislikes %>
-                        </span>
-                        <!--downvote-->
-                        <div class="dislike" value=<%= bars[i].barDislikes %>>
-                            <i class="fa-solid fa-angle-down"></i>
-                        </div>
+                        <figure class="flex flex-vertical flex-content">
+                            <blockquote><%= bars[i].barLyrics %></blockquote>
+                            <figcaption>
+                                <!--&mdash; --><span class="barRapper"><%= bars[i].barRapper %></span>,
+                                <cite class="barSong"><%= bars[i].barSong %></cite>
+                            </figcaption>
+                        </figure>
                     </div>
-                    <figure class="flex flex-vertical flex-content">
-                        <blockquote value=<%= bars[i]._id %>><%= bars[i].barLyrics %></blockquote>
-                        <figcaption>
-                            <!--&mdash; --><span class="barRapper"><%= bars[i].barRapper %></span>,
-                            <cite class="barSong"><%= bars[i].barSong %></cite>
-                        </figcaption>
-                    </figure>
-                    <ul class="bar-control">
+                    
+
+                    <ul class="bar-control flex">
                         <!-- <li>
                             <button class="bar-button bar-edit">Edit</button>
                         </li>
