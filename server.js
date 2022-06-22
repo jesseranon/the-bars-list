@@ -7,11 +7,13 @@ require('dotenv').config();
 const PORT = process.env.PORT || 3000;
 const connectionString = process.env.CONNECTIONSTRING;
 
+let message = [];
+
 MongoClient.connect(connectionString, {
     useUnifiedTopology: true
 })
     .then(client => {
-        let message = [];
+        
 
         const db = client.db('rapper-api');
 
@@ -35,11 +37,7 @@ MongoClient.connect(connectionString, {
             message = [];
             let bar = request.body;
             console.log(bar);
-            for (const param in bar) {
-                if (!bar[param]) {
-                    message.push(`${param.slice(3)} not filled in`);    
-                }
-            }
+            verifySubmittedFields(bar);
             if (message.length > 0) return response.json({ message });
             let duplicate;
             db.collection('rappers').findOne({ barLyrics: request.body.barLyrics }) 
@@ -70,12 +68,38 @@ MongoClient.connect(connectionString, {
                 });
         });
 
+        app.put('/editBar', (request, response) => {
+            console.log(request.body);
+            message = [];
+            const id = setGoodId(request.body);
+            console.log(id);
+            db.collection('rappers').findOneAndUpdate(
+                { _id: id },
+                {
+                    $set: {
+                        barLyrics: request.body.barLyrics,
+                        barRapper: request.body.barRapper,
+                        barSong: request.body.barSong
+                    }
+                },
+                {
+                    upsert: false
+                }
+                )
+                .then(result => {
+                    response.json({ success: 'success' });
+                })
+                .catch(err => {
+                    message.push(err);
+                    response.json({ error: err });
+                });
+        });
+
         app.put('/addVote', (request, response) => {
             message = [];
-            const id = request.body.barId;
-            const goodId = new ObjectId(id);  
+            const id = setGoodId(request.body);
             db.collection('rappers').findOneAndUpdate(
-                { _id: goodId },
+                { _id: id },
                 {
                     $set: {
                         barLikes: request.body.barLikes,
@@ -83,7 +107,7 @@ MongoClient.connect(connectionString, {
                     }
                 },
                 {
-                    upsert: true
+                    upsert: false
                 }
                 )
                 .then(result => {
@@ -121,3 +145,17 @@ MongoClient.connect(connectionString, {
         });
     })
     .catch(err => console.error(err));
+
+function verifySubmittedFields(obj) {
+    for (const param in obj) {
+        if (!obj[param]) {
+            message.push(`${param.slice(3)} not filled in`);    
+        }
+    }
+}
+
+function setGoodId(obj) {
+    const id = obj.barId;
+    const goodId = new ObjectId(id);
+    return goodId;
+}

@@ -20,18 +20,18 @@
         </ul>
     </header>
     <div class="barForm flex form-flex">
-        <form> <!--<form method="POST" action="addBar">-->
-            <input type="text" placeholder="Your favorite bars" name="barLyrics" id="barLyrics">
+        <form class="submit-bar"> <!--<form method="POST" action="addBar">-->
+            <input type="text" placeholder="Add your favorite bars" name="barLyrics" id="barLyrics">
             <input type="text" placeholder="Rapper Name" name="barRapper" id="barRapper">
             <input type="text" placeholder="Song" name="barSong" id="barSong">
-            <button id="submit-bar" type="submit">Submit</button>
+            <button id="submit-bar" type="submit">Post up.</button>
         </form>
     </div>
     <div class="barsList">
         <ul class="bars">
             <% for (let i = 0; i < bars.length; i++) { %>
-                <li class="bar flex flex-horizontal" value=<%= bars[i]._id %>>
-                    <div class="bar-info flex">
+                <li class="bar" value=<%= bars[i]._id %>>
+                    <div class="bar-info flex flex-horizontal">
                         <div class="likes-dislikes flex flex-vertical flex-votes">
                             <!--upvote-->
                             <div class="like" value=<%= bars[i].barLikes %>>
@@ -48,23 +48,14 @@
                         </div>
                         <figure class="flex flex-vertical flex-content">
                             <blockquote><%= bars[i].barLyrics %></blockquote>
-                            <figcaption>
-                                <!--&mdash; --><span class="barRapper"><%= bars[i].barRapper %></span>,
-                                <cite class="barSong"><%= bars[i].barSong %></cite>
-                            </figcaption>
+                                <figcaption>
+                                    <!--&mdash; --><span class="barRapper"><%= bars[i].barRapper %></span>,
+                                    <cite class="barSong"><%= bars[i].barSong %></cite>
+                                </figcaption>
                         </figure>
+                        
                     </div>
-                    
-
-                    <ul class="bar-control flex">
-                        <!-- <li>
-                            <button class="bar-button bar-edit">Edit</button>
-                        </li>
-                        <li>
-                            <button class="bar-button bar-delete">Delete</button>
-                        </li> -->
-                    </ul>
-                    
+                    <div class="bar-control flex"></div>
                 </li>
             <% } %>
         </ul>
