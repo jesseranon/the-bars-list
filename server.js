@@ -97,8 +97,6 @@ MongoClient.connect(connectionString, {
             message = [];
             const id = setGoodId(request.body);
             const bodyActions = request.body.sendAction;
-            let likes = request.body.barLikes;
-            let dislikes = request.body.barDislikes; 
             for (const action of Object.keys(bodyActions)) {
                 if (bodyActions[action] === 'increment') request.body[action] += 1;
                 if (bodyActions[action] === 'decrement') request.body[action] -= 1;

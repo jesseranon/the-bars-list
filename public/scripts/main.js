@@ -189,22 +189,6 @@ async function deleteBar(obj) {
     else return console.log('You did not submit this bar');
 }
 
-//HELPER FUNCTIONS
-function getBarProperties(element) {
-    let liBar;
-    if (!element.classList.contains('bar')) liBar = element.closest('.bar');
-    else liBar = element;
-
-    return {
-        barId: liBar.getAttribute('value'),
-        barLyrics: liBar.querySelector('blockquote').innerText,
-        barRapper: liBar.querySelector('.barRapper').innerText,
-        barSong: liBar.querySelector('.barSong').innerText,
-        barLikes: Number(liBar.querySelector('.like').getAttribute('value')),
-        barDislikes: Number(liBar.querySelector('.dislike').getAttribute('value'))
-    }
-}
-
 /* BAR EDIT FUNCTIONS */
 async function editBar(target) {
     const liBar = target.closest('.bar');
@@ -251,7 +235,22 @@ async function submitEdit(barElement) {
     }
 }
 
-/* BAR EDIT ELEMENTS STUFF */
+//HELPER FUNCTIONS
+function getBarProperties(element) {
+    let liBar;
+    if (!element.classList.contains('bar')) liBar = element.closest('.bar');
+    else liBar = element;
+
+    return {
+        barId: liBar.getAttribute('value'),
+        barLyrics: liBar.querySelector('blockquote').innerText,
+        barRapper: liBar.querySelector('.barRapper').innerText,
+        barSong: liBar.querySelector('.barSong').innerText,
+        barLikes: Number(liBar.querySelector('.like').getAttribute('value')),
+        barDislikes: Number(liBar.querySelector('.dislike').getAttribute('value'))
+    }
+}
+
 function hideBarFigureElements(barElement) {
     const figure = barElement.querySelector('figure');
     Array.from(figure.children).forEach(el => {
@@ -281,15 +280,6 @@ function unhideBarControl(barElement) {
 }
 
 async function renderEditBarForm(barElement, barObj) {
-    /*
-    <form>
-        <textarea> lyrics
-        <input> artist
-        <input> song
-        <button> cancel
-        <button> submit edits
-    <form>
-    */
     const bar = barObj;
 
     const form = document.createElement('form');
