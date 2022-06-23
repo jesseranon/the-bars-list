@@ -2,6 +2,20 @@
     --default-background: white;
 }
 
+body {
+    background-image: url('../images/oscar-keys-ojVMh1QTVGY-unsplash.jpg');
+    background-size: cover;
+}
+
+header {
+    background-color: var(--default-background);
+}
+
+h1,
+ul {
+    margin: 0;
+}
+
 ul {
     list-style: none;
 }
@@ -34,6 +48,8 @@ ul {
     padding: .5rem 1rem;
 
     border-radius: 2px;
+
+    background: white;
 }
 
 figure {
@@ -93,8 +109,6 @@ figcaption {
     color: red;
 }
 
-.created .like,
-.created .votes,
 .liked {
     color: orangered;
 }
@@ -105,13 +119,18 @@ figcaption {
 
 .created {
     /* border-color: orangered; */
-    background-color: rgba(255, 69, 0, .3);
+    background-color: rgba(255, 69, 0, 1);
 }
 
 .created .like,
 .created .dislike,
 .disabled {
     pointer-events: none;
+}
+
+.created .like,
+.created .dislike {
+    color: rgba(0, 0, 0, .2);
 }
 
 .bar-info {
