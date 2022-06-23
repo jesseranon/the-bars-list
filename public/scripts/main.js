@@ -1,6 +1,7 @@
 const SUBMIT_BUTTON = document.querySelector('#submit-bar');
 const LIKE_BUTTONS = Array.from(document.querySelectorAll('.like'));
 const DISLIKE_BUTTONS = Array.from(document.querySelectorAll('.dislike'));
+const VOTE_BUTTONS = LIKE_BUTTONS.concat(DISLIKE_BUTTONS);
 const FORM_LYRICS = document.querySelector('#barLyrics');
 const FORM_RAPPER = document.querySelector('#barRapper');;
 const FORM_SONG = document.querySelector('#barSong');;
@@ -16,64 +17,37 @@ SUBMIT_BUTTON.addEventListener('click', async e => {
     await postBar(bar);
 });
 
-LIKE_BUTTONS.forEach(async likeButton => {
-    likeButton.addEventListener('click', async e => {
-        const bar = getBarProperties(e.currentTarget);
-
-        let lsBar = LS.getItem(bar.barId);
-
-        if (!lsBar) {
-            //if it's not already in local storage, it hasn't been counted toward likes/dislikes
-            LS.setItem(bar.barId, 'like');
-            bar.barLikes += 1;
+VOTE_BUTTONS.forEach(async button => {
+    button.addEventListener('click', async e => {
+        const target = e.currentTarget;
+        const bar = getBarProperties(target);
+        const lsBar = LS.getItem(bar.barId);
+        const action = target.classList[0];
+        const barParam = `bar${action.charAt(0).toUpperCase().concat(action.slice(1), 's')}`;
+        const oppositeParam = (barParam === 'barLikes') ? 'barDislikes' : 'barLikes';
+        
+        const sendAction = {};
+        if (lsBar == action) {
+            console.log('localstorage equal to action clicked');
+            sendAction[barParam] = 'decrement';
         } else {
-            //if it's already in local storage, it has already been counted toward likes/dislikes
-            if (lsBar == 'like') {
-                LS.removeItem(bar.barId);
-                bar.barLikes -= 1;
-            } else if (lsBar == 'dislike') {
-                LS.setItem(bar.barId, 'like');
-                bar.barLikes += 1;
-                bar.barDislikes -= 1;
+            console.log('localstorage not equal to action clicked');
+            if (lsBar && lsBar != action) {
+                console.log('localstorage exists and is not equal to action clicked');
+                sendAction[oppositeParam] = 'decrement';
             }
+            sendAction[barParam] = 'increment';
         }
 
-        lsBar = LS.getItem(bar.barId);
+        bar.sendAction = sendAction;
+        console.log(bar.sendAction);
 
-        // send post to update likes
-        await putVote(bar);
-    });
-});
-
-DISLIKE_BUTTONS.forEach(async dislikeButton => {
-    dislikeButton.addEventListener('click', async e => {
-        const bar = getBarProperties(e.currentTarget);
-        // console.log(bar);
-        let lsBar = LS.getItem(bar.barId);
-
-        if (!lsBar) {
-            LS.setItem(bar.barId, 'dislike');
-            bar.barDislikes += 1;
-        } else {
-            if (lsBar == 'dislike') {
-                LS.removeItem(bar.barId);
-                bar.barDislikes -= 1;
-            } else if (lsBar == 'like') {
-                LS.setItem(bar.Id, 'dislike');
-                bar.barLikes -= 1;
-                bar.barDislikes += 1;
-            }
-        }
-
-        lsBar = LS.getItem(bar.barId);
-
-        //send post to update dislikes
         await putVote(bar);
     });
 });
 
 window.addEventListener('DOMContentLoaded', e => {
-    const barsListItems = Array.from(document.querySelectorAll('.bar'));
+    const barsListItems = Array.from(document.querySelectorAll('.bar')); //adapt getBarProperties function to look at .bar elements?
     barsListItems.forEach(bar => {
         const barId = bar.getAttribute('value');
         const barLyrics = bar.querySelector('blockquote').innerText;
@@ -104,8 +78,10 @@ window.addEventListener('DOMContentLoaded', e => {
                 controlEl.appendChild(el);
             });
         }
+        
     });
 
+    //setting delete buttons
     const deleteButtons = Array.from(document.querySelectorAll('.bar-delete'));
 
     deleteButtons.forEach(async deleteButton => {
@@ -120,6 +96,7 @@ window.addEventListener('DOMContentLoaded', e => {
         });
     });
 
+    //setting edit buttons
     const editButtons = Array.from(document.querySelectorAll('.bar-edit'));
 
     editButtons.forEach(async editButton => {
@@ -128,21 +105,21 @@ window.addEventListener('DOMContentLoaded', e => {
             await editBar(e.currentTarget, bar);
         });
     });
-    // let ls = Array.from(Object.keys(window.localStorage));
+    
+    // clear unlisted items from localstorage
+    if (LS.length > 0) {
+        let ls = Object.keys(LS);
+        const barIds = barsListItems.map(b => b.getAttribute('value'));
+        const barLyrics = barsListItems.map(b => b.querySelector('blockquote').innerText);
+        console.log(ls);
+        console.log(barIds);
+        console.log(barLyrics);
+        for (const item of ls) {
+            if (!barIds.includes(item) && !barLyrics.includes(item)) LS.removeItem(item);
+        }
+        console.log(LS);
+    }
 });
-
-function getBarProperties(buttonElement) {
-    const liBar = buttonElement.closest('.bar');
-    // console.log(liBar);
-    const barId = liBar.getAttribute('value'); 
-    const barLyrics = liBar.querySelector('blockquote').innerText;
-    const barRapper = liBar.querySelector('.barRapper').innerText;
-    const barSong = liBar.querySelector('.barSong').innerText;
-    const barLikes = Number(liBar.querySelector('.like').getAttribute('value'));
-    const barDislikes = Number(liBar.querySelector('.dislike').getAttribute('value'));
-
-    return { barId, barLyrics, barRapper, barSong, barLikes, barDislikes };
-}
 
 async function postBar(obj) {
     console.log(obj);
@@ -173,7 +150,16 @@ async function putVote(obj) {
             body: JSON.stringify(obj)
         });
         const data = await response.json();
-        console.log(data);
+        if (data.success) {
+            const bodyActions = data.bodyActions;
+            for (const action of Object.keys(bodyActions)) {
+                if (bodyActions[action] === 'decrement') LS.removeItem(data.id);
+                if (bodyActions[action] === 'increment') {
+                    let localStorageValue = action.charAt(3).toLowerCase().concat(action.slice(4, -1));
+                    LS.setItem(data.id, localStorageValue);    
+                }
+            }
+        }
         window.location.reload(true);
     }
     catch (error) {
@@ -187,7 +173,6 @@ async function deleteBar(obj) {
     const ls = LS.getItem(id);
     console.log(ls);
     if (ls == 'created') {
-        
         try {
             const response = await fetch(`delete/${id}`, {
                 method: 'delete',
@@ -196,13 +181,28 @@ async function deleteBar(obj) {
             })
             const data = await response.json();
             console.log(data);
-            LS.removeItem(data._id);
             window.location.reload(true);
         } catch (error) {
             console.error(error);
         }
     }
     else return console.log('You did not submit this bar');
+}
+
+//HELPER FUNCTIONS
+function getBarProperties(element) {
+    let liBar;
+    if (!element.classList.contains('bar')) liBar = element.closest('.bar');
+    else liBar = element;
+
+    return {
+        barId: liBar.getAttribute('value'),
+        barLyrics: liBar.querySelector('blockquote').innerText,
+        barRapper: liBar.querySelector('.barRapper').innerText,
+        barSong: liBar.querySelector('.barSong').innerText,
+        barLikes: Number(liBar.querySelector('.like').getAttribute('value')),
+        barDislikes: Number(liBar.querySelector('.dislike').getAttribute('value'))
+    }
 }
 
 /* BAR EDIT FUNCTIONS */
@@ -226,6 +226,29 @@ function cancelEdit(barElement) {
     unhideBarControl(barElement);
     figure.removeChild(form);
     unhideBarFigureElements(barElement);
+}
+
+async function submitEdit(barElement) {
+    const submitObj = {};
+
+    submitObj.barId = barElement.getAttribute('value');
+    submitObj.barLyrics = barElement.querySelector('.edit-lyrics').value;
+    submitObj.barRapper = barElement.querySelector('.edit-rapper').value;
+    submitObj.barSong = barElement.querySelector('.edit-song').value;
+
+    try {
+        const response = await fetch('editBar', {
+            method: 'put',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(submitObj)
+        });
+        const data = await response.json();
+        console.log(data);
+        window.location.reload(true);
+    }
+    catch (error) {
+        console.error(error);
+    }
 }
 
 /* BAR EDIT ELEMENTS STUFF */
@@ -267,16 +290,21 @@ async function renderEditBarForm(barElement, barObj) {
         <button> submit edits
     <form>
     */
+    const bar = barObj;
+
     const form = document.createElement('form');
     form.classList.add('edit-bar');
-    const bar = barObj;
+
     const lyricsInput = document.createElement('textarea');
     lyricsInput.classList.add('edit-lyrics');
     lyricsInput.value = bar.barLyrics;
+
     const br = document.createElement('br');
+
     const rapperInput = document.createElement('input');
     rapperInput.classList.add('edit-rapper');
     rapperInput.value = bar.barRapper;
+
     const songInput = document.createElement('input');
     songInput.classList.add('edit-song');
     songInput.value = bar.barSong;
@@ -284,7 +312,7 @@ async function renderEditBarForm(barElement, barObj) {
     const editCancel = document.createElement('button');
     editCancel.textContent = 'Cancel';
     const editSubmit = document.createElement('button');
-    editSubmit.textContent = 'Submit edit.';
+    editSubmit.textContent = 'Submit edit';
 
     const figure = barElement.querySelector('figure');
 
@@ -295,7 +323,7 @@ async function renderEditBarForm(barElement, barObj) {
 
     editSubmit.addEventListener('click', async e => {
         e.preventDefault();
-        await submitEdit(e.currentTarget);
+        await submitEdit(barElement);
     });
 
     [lyricsInput, br, rapperInput, songInput, editCancel, editSubmit].forEach(el => {
@@ -303,28 +331,4 @@ async function renderEditBarForm(barElement, barObj) {
     });
 
     figure.appendChild(form);
-}
-
-async function submitEdit(buttonElement) {
-    const submitObj = {};
-    const barElement = buttonElement.closest('.bar');
-
-    submitObj.barId = barElement.getAttribute('value');
-    submitObj.barLyrics = barElement.querySelector('.edit-lyrics').value;
-    submitObj.barRapper = barElement.querySelector('.edit-rapper').value;
-    submitObj.barSong = barElement.querySelector('.edit-song').value;
-
-    try {
-        const response = await fetch('editBar', {
-            method: 'put',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(submitObj)
-        });
-        const data = await response.json();
-        console.log(data);
-        window.location.reload(true);
-    }
-    catch (error) {
-        console.error(error);
-    }
 }

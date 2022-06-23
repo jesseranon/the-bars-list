@@ -13,8 +13,6 @@ MongoClient.connect(connectionString, {
     useUnifiedTopology: true
 })
     .then(client => {
-        
-
         const db = client.db('rapper-api');
 
         app.set('view engine', 'ejs');
@@ -23,7 +21,6 @@ MongoClient.connect(connectionString, {
         app.use(express.json());
 
         app.get('/', (request, response) => {
-            // console.log(request);
             db.collection('rappers').find().toArray()
                 .then(data => {
                     response.render('index.ejs', { bars: data, message });
@@ -49,7 +46,7 @@ MongoClient.connect(connectionString, {
                             barLyrics: bar.barLyrics,
                             barRapper: bar.barRapper,
                             barSong: bar.barSong,
-                            barLikes: 0,
+                            barLikes: 1,
                             barDislikes: 0
                         })
                             .then(result => {
@@ -71,8 +68,9 @@ MongoClient.connect(connectionString, {
         app.put('/editBar', (request, response) => {
             console.log(request.body);
             message = [];
+            verifySubmittedFields(request.body);
+            if (message.length > 0) return response.json({ message });
             const id = setGoodId(request.body);
-            console.log(id);
             db.collection('rappers').findOneAndUpdate(
                 { _id: id },
                 {
@@ -98,6 +96,13 @@ MongoClient.connect(connectionString, {
         app.put('/addVote', (request, response) => {
             message = [];
             const id = setGoodId(request.body);
+            const bodyActions = request.body.sendAction;
+            let likes = request.body.barLikes;
+            let dislikes = request.body.barDislikes; 
+            for (const action of Object.keys(bodyActions)) {
+                if (bodyActions[action] === 'increment') request.body[action] += 1;
+                if (bodyActions[action] === 'decrement') request.body[action] -= 1;
+            }
             db.collection('rappers').findOneAndUpdate(
                 { _id: id },
                 {
@@ -112,11 +117,11 @@ MongoClient.connect(connectionString, {
                 )
                 .then(result => {
                     console.log(result);
-                    response.json({ success: 'success' });
+                    response.json({ success: true, id: request.body.barId, bodyActions });
                 })
                 .catch(err => {
-                    message.push(err);
-                    response.json({ error: err });
+                    message.push(error);
+                    response.json({ success: false, error });
                 });
         });
 

@@ -93,6 +93,8 @@ figcaption {
     color: red;
 }
 
+.created .like,
+.created .votes,
 .liked {
     color: orangered;
 }
@@ -107,7 +109,8 @@ figcaption {
 }
 
 .created .like,
-.created .dislike {
+.created .dislike,
+.disabled {
     pointer-events: none;
 }
 
