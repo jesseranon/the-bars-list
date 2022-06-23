@@ -3,8 +3,10 @@
 }
 
 body {
-    background-image: url('../images/oscar-keys-ojVMh1QTVGY-unsplash.jpg');
+    background: black url('../images/oscar-keys-ojVMh1QTVGY-unsplash.jpg') no-repeat center center;
     background-size: cover;
+    background-position: fixed;
+    min-height: 100vh;
 }
 
 header {
